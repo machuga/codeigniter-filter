@@ -1,19 +1,17 @@
 CodeIgniter-Filter
 ==================
 
-CodeIgniter-Filter adds basic before_filter and after_filter functionality to controllers in CodeIgniter applications using hooks.
+CodeIgniter-Filter adds basic before_filter and after_filter
+functionality to controllers in CodeIgniter applications using a custom
+controller.
 
-Configuration
--------------
+I've opted to ditch the hooks method due to not being able to have a
+protected or private visability on controller methods used as callbacks.
 
-$config['enable_hooks'] = TRUE; 	Turns on hooks
-
-Demo
-----
-
-Run the demo controller to see an example of how it works.
+All you need to do is extend from MY_Controller instead of CI_Controller
+and the functionality will be available.
 
 Notes
 _____
 
-Compatible with PHP > 5.0
+Compatible with PHP5 and CI2.0+
