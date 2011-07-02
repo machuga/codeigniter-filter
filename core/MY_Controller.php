@@ -17,7 +17,8 @@
 class MY_Controller extends CI_Controller {
 
     protected $before_filter   = array(
-        'action'    => 'redirect_if_not_logged_in',
+        // Example
+        // 'action'    => 'redirect_if_not_logged_in',
     );
 
     protected $after_filter    = array();
