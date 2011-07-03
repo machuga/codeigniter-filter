@@ -41,7 +41,7 @@ class MY_Controller extends CI_Controller {
         {
             if (isset($this->{$method}) && ! empty($this->{$method}))
             {
-                $this->filter($method);
+                $this->filter($method, $args[0]);
             }
         }
         else
@@ -52,7 +52,7 @@ class MY_Controller extends CI_Controller {
     }
 
     // Begins processing filters
-    protected function filter($filter_type)
+    protected function filter($filter_type, $params)
     {
         $called_action = $this->router->fetch_method();
 
@@ -60,18 +60,18 @@ class MY_Controller extends CI_Controller {
         {
             foreach ($this->{$filter_type} as $filter)
             {
-                $this->run_filter($filter, $called_action);
+                $this->run_filter($filter, $called_action, $params);
             }
         }
         else
         {
-            $this->run_filter($this->{$filter_type}, $called_action);
+            $this->run_filter($this->{$filter_type}, $called_action, $params);
         }
     }
 
     // Determines if the filter method can be called and calls the requested 
     // action if so, otherwise returns false
-    protected function run_filter(array &$filter, $called_action)
+    protected function run_filter(array &$filter, $called_action, $params)
     {
         if (method_exists($this, $filter['action']))
         {
@@ -86,15 +86,15 @@ class MY_Controller extends CI_Controller {
             }
             elseif ($only && in_array($called_action, $filter['only'])) 
             {
-                $this->{$filter['action']}();
+                empty($params) ? $this->{$filter['action']}() : $this->{$filter['action']}($params);
             }
             elseif ($except && ! in_array($called_action, $filter['except'])) 
             {
-                $this->{$filter['action']}();
+                empty($params) ? $this->{$filter['action']}() : $this->{$filter['action']}($params);
             }
             elseif ( ! $only && ! $except) 
             {
-                $this->{$filter['action']}();
+                empty($params) ? $this->{$filter['action']}() : $this->{$filter['action']}($params);
             }
 
             return true;
@@ -114,6 +114,8 @@ class MY_Controller extends CI_Controller {
     /*
      *
      * Example callbacks for filters
+     * Callbacks can optionally have one parameter consisting of the
+     * parameters passed to the called action.
      *
      */
 
