@@ -41,7 +41,7 @@ class MY_Controller extends CI_Controller {
         {
             if (isset($this->{$method}) && ! empty($this->{$method}))
             {
-                $this->filter($method, $args[0]);
+                $this->filter($method, isset($args[0]) ? $args[0] : $args);
             }
         }
         else
