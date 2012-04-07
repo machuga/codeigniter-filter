@@ -26,12 +26,12 @@ class MY_Controller extends CI_Controller {
     // Utilize _remap to call the filters at respective times
     public function _remap($method, $params = array())
     {
-        $this->before_filter();
+        $this->before_filter($params);
         if (method_exists($this, $method))
         {
             empty($params) ? $this->{$method}() : call_user_func_array(array($this, $method), $params);
         }
-        $this->after_filter();
+        $this->after_filter($params);
     }
 
     // Allows for before_filter and after_filter to be called without aliases
