@@ -34,10 +34,42 @@ class MY_Controller extends CI_Controller {
 
         log_message('debug', "before_filter succeeded, continuing");
         
+        $RTR =& load_class('Router', 'core');
+        $class = get_class($this);
+        $controller = NULL;
+        
         if (method_exists($this, $method))
         {
-            empty($params) ? $this->{$method}() : call_user_func_array(array($this, $method), $params);
+        	$controller = $this;
         }
+		// Check and see if we are using a 404 override and use it.
+        else if (!empty($RTR->routes['404_override']))
+		{
+			$x = explode('/', $RTR->routes['404_override']);
+			$class = $x[0];
+			$method = (isset($x[1]) ? $x[1] : 'index');
+			
+			if (class_exists($class))
+			{
+				$controller = new $class();
+			}
+			else if (file_exists(APPPATH.'controllers/'.$class.'.php'))
+			{
+				include_once(APPPATH.'controllers/'.$class.'.php');
+				$controller = new $class();
+			}
+		}
+
+		if ($controller)
+		{
+			empty($params) ? $controller->{$method}() :
+				call_user_func_array(array($controller, $method), $params);
+		}
+		else
+		{
+			show_404("{$class}/{$method}");
+		}
+
         $this->after_filter();
     }
 
