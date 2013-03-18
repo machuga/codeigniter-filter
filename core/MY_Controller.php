@@ -94,7 +94,8 @@ class MY_Controller extends CI_Controller {
         else
         {
             log_message('error', "Call to nonexistent method ".get_called_class()."::{$method}");
-            return false;
+            throw new Exception("Call to nonexistent method ".
+            	get_called_class()."::{$method}");
         }
     }
 
