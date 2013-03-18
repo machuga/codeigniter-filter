@@ -26,7 +26,14 @@ class MY_Controller extends CI_Controller {
     // Utilize _remap to call the filters at respective times
     public function _remap($method, $params = array())
     {
-        $this->before_filter();
+        if (!$this->before_filter())
+        {
+            log_message('debug', "before_filter failed, returning early");
+        	return false;
+        }
+
+        log_message('debug', "before_filter succeeded, continuing");
+        
         if (method_exists($this, $method))
         {
             empty($params) ? $this->{$method}() : call_user_func_array(array($this, $method), $params);
@@ -41,7 +48,15 @@ class MY_Controller extends CI_Controller {
         {
             if (isset($this->{$method}) && ! empty($this->{$method}))
             {
-                $this->filter($method, isset($args[0]) ? $args[0] : $args);
+                $result = $this->filter($method, isset($args[0]) ? $args[0] : $args);
+	            log_message('debug', get_called_class()."::{$method}".
+	            	" result = $result");
+                return $result;
+            }
+            else
+            {
+            	// If no filters are configured, treat it as success.
+            	return true;
             }
         }
         else
@@ -60,13 +75,21 @@ class MY_Controller extends CI_Controller {
         {
             foreach ($this->{$filter_type} as $filter)
             {
-                $this->run_filter($filter, $called_action, $params);
+                if (!$this->run_filter($filter, $called_action, $params))
+                {
+                	return false;
+                }
             }
         }
         else
         {
-            $this->run_filter($this->{$filter_type}, $called_action, $params);
+            if (!$this->run_filter($this->{$filter_type}, $called_action, $params))
+            {
+            	return false;
+            }
         }
+        
+        return true;
     }
 
     // Determines if the filter method can be called and calls the requested 
@@ -86,18 +109,18 @@ class MY_Controller extends CI_Controller {
             }
             elseif ($only && in_array($called_action, $filter['only'])) 
             {
-                empty($params) ? $this->{$filter['action']}() : $this->{$filter['action']}($params);
+                $result = empty($params) ? $this->{$filter['action']}() : $this->{$filter['action']}($params);
             }
             elseif ($except && ! in_array($called_action, $filter['except'])) 
             {
-                empty($params) ? $this->{$filter['action']}() : $this->{$filter['action']}($params);
+                $result = empty($params) ? $this->{$filter['action']}() : $this->{$filter['action']}($params);
             }
             elseif ( ! $only && ! $except) 
             {
-                empty($params) ? $this->{$filter['action']}() : $this->{$filter['action']}($params);
+                $result = empty($params) ? $this->{$filter['action']}() : $this->{$filter['action']}($params);
             }
 
-            return true;
+            return $result;
         }
         else
         {
